@@ -5,15 +5,13 @@ auth = Auth.new
 client = Octokit::Client.new :access_token => auth.get_token
 user = client.user
 user.login
-
-
+sum = 0
 client.repos.each do |repo|
-    puts repo.name
-    #puts repo.description
-
-    # find the urls
-    #puts repo.rels[:html].href
-    #puts repo.rels[:git].href
-    #puts repo.rels[:clone].href
-    #puts repo.rels[:ssh].href
+	puts repo.name
+	puts repo.owner.login
+	commit_list =  Octokit.commits_before("#{repo.owner.login}/#{repo.name}", '2013-11-01')
+	commit_count = commit_list.count
+	puts commit_count
+	puts "-------------------------------------------"
 end
+puts "total commits =  #{sum}" 
