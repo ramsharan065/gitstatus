@@ -2,7 +2,8 @@ require_relative 'auth'
 require 'octokit'
 
 auth = Auth.new
-client = Octokit::Client.new :access_token => auth.get_token
+#client = Octokit::Client.new :access_token => auth.get_token
+client = Octokit::Client.new :login => auth.get_username, :password => get_pass
 user = client.user
 user.login
 sum = 0
