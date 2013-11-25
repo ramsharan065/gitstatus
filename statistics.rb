@@ -18,6 +18,7 @@ class Statistics
 
 	#set the user configurations for page limits
 	def set_config
+		$org_git_name = 'leapfrogtechnology'
 		$client.per_page = 100
 		$client.auto_paginate = true
 	end
@@ -53,33 +54,44 @@ class Statistics
 		total_commit_count = 0
 		committer_name = []
 		$all_repo = Hash.new(0)
-		$client.org_repos('leapfrogtechnology').each do |repo|
+		$client.org_repos($org_git_name).each do |repo|
 			repo_commit_count = 0
-			puts "Calculating commits for repo \"#{repo.name}\", Please wait..."
+			print "Calculating commits for repo \"#{repo.name}\", Please wait"
 			branch_list = $client.branches("#{repo.owner.login}/#{repo.name}")
+			all_commit_list = []
 			branch_list.each do |branch|
+				print "."
 				branch_commit_count = 0
 				branch_name = branch.name
-				print "Calculating commits for branch \"#{branch_name}\""
 				if($start_date == $end_date)
 					commit_list =  $client.commits_on("#{repo.owner.login}/#{repo.name}",$start_date,branch_name)
 				else
 					commit_list =  $client.commits_between("#{repo.owner.login}/#{repo.name}",$start_date,$end_date,branch_name)
 				end
-				branch_commit_count = commit_list.length
-				commit_list.each do |commit|
-					if commit.committer
-						make_committer_name = "#{commit.committer.login} (#{commit.commit.committer.name})"
-					else
-						make_committer_name = "\t (#{commit.commit.committer.name})"
-					end
-					committer_name << make_committer_name
-				end
-			repo_commit_count = repo_commit_count + branch_commit_count
-			print "=> #{branch_commit_count} commits\n"
+				all_commit_list << commit_list
 			end
+			all_commit_list = all_commit_list.flatten
+			temp_commit_list = []
+			temp_commit_hash = Hash.new(0)
+			unless all_commit_list.empty?
+				all_commit_list.each do |commit_lst|
+					if commit_lst.committer
+						make_committer_name = "#{commit_lst.committer.login} (#{commit_lst.commit.committer.name})"
+					else
+						make_committer_name = "\t (#{commit_lst.commit.committer.name})"
+					end
+					temp_commit_hash[commit_lst.sha] = make_committer_name
+				end
+			end
+			unless temp_commit_hash.empty?
+				temp_commit_hash.each do |key, value|
+					committer_name << value
+				end
+			end
+
+			repo_commit_count = temp_commit_hash.length
 			$all_repo[repo.name] = repo_commit_count
-			puts "\"#{repo.name}\" repo has \"#{repo_commit_count}\" commits\n\n"
+			puts "\n\"#{repo.name}\" repo has \"#{repo_commit_count}\" commits\n\n"
 			total_commit_count = total_commit_count + repo_commit_count
 		end
 		calculate_user_commit_count(committer_name)
@@ -113,18 +125,13 @@ puts "Authentcating, Please wait..."
 stat.authenticate
 stat.set_config
 total = stat.calculate
-puts "========================\nREPORT from #{$start_date} to #{$end_date}\n========================\n\n"
+puts "==================================\nREPORT from #{$start_date} to #{$end_date}\n==================================\n\n"
 puts "Total Commit = #{total}\n\n"
-puts "------------------------\nRepo Name => Commit Count\n------------------------"
+puts "----------------------------------\nRepo Name => Commit Count\n----------------------------------"
 $all_repo.each do |repo_name, repo_commit_count|
 	puts repo_name + "=>" + repo_commit_count.to_s
 end
-puts "\n------------------------\nUser Name => Commit Count\n------------------------"
+puts "\n----------------------------------\nUser Name => Commit Count\n----------------------------------"
 $all_user.each do |username, commit_count|
 	puts username + " => " + commit_count.to_s
 end
-
-
-
-
-
