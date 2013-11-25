@@ -3,7 +3,7 @@ require 'date'
 class Statistics
 	
 	#Authentcating the git api using the personal access token
-	#To generate one https://github.com/settings/tokens/new
+	#To generate token https://github.com/settings/tokens/new
 	def authenticate
 		my_access_token = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"#add your personal access token here 
 		$client = Octokit::Client.new :access_token => my_access_token
