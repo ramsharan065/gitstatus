@@ -17,7 +17,7 @@ To install octokit use the following command in terminal:
 $gem install octokit
 ```
 
-Usage: 
+Usage : 
 ---------
 After the requirements is fulfiled use the following command to get the report
 ```
