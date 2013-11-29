@@ -1,5 +1,5 @@
 Git Status
-=========
+==========
 
 This gives the following report of the git repos of the organisation.
 
